@@ -133,9 +133,30 @@ async def not_joined(client: Client, message: Message):
     except IndexError:
         pass
 
-    await message.reply(
-        text = FORCE_MSG.format(
-                first = message.from_user.first_name,
+        try:
+        await message.reply(
+            text = FORCE_MSG.format(
+                    first = message.from_user.first_name,
+                    last = message.from_user.last_name,
+                    username = None if not message.from_user.username else '@' + message.from_user.username,
+                    mention = message.from_user.mention,
+                    id = message.from_user.id
+                ),
+            reply_markup = InlineKeyboardMarkup(buttons),
+            quote = True,
+            disable_web_page_preview = True
+        )
+    except UserIsBlocked:
+        print(f"User {message.from_user.id} blocked the bot. Cannot send ForceSub message.")
+        return # Stop execution for this user
+    except Exception as e:
+        print(f"ForceSub error: {e}")
+        return
+
+@Bot.on_message(filters.command('users') & filters.private & filters.user(ADMINS))
+async def get_users(client: Bot, message: Message):
+    # ... the rest of your code stays exactly the same ...
+
                 last = message.from_user.last_name,
                 username = None if not message.from_user.username else '@' + message.from_user.username,
                 mention = message.from_user.mention,
